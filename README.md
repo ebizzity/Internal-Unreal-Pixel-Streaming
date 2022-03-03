@@ -1,4 +1,14 @@
-# Pixel Streaming in Azure
+# Pixel Streaming in Azure - Internal Network
+
+This project was forked from - https://github.com/Azure/Unreal-Pixel-Streaming
+
+There are specific changes to terraform and some of the powershell scripts to make this an internal deployment, vs a deployment with public endpoints.
+
+PowerShell changes are in the following file:  Engine\Source\Programs\PixelStreaming\WebServers\SignallingWebServer\Start_Azure_SignallingServer.ps1
+
+The other changes are within the terraform templates.
+
+
 
 ### Important
 

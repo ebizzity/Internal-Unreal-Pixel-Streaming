@@ -2,11 +2,13 @@
 
 # To avoid customers seeing an IP in the browser, set VMFQDN env variable with the VM DNS
 if ($env:VMFQDN) {
-    $PublicIp = $env:VMFQDN
+    #$PublicIp = $env:VMFQDN
+    $PublicIP = $(get-netipaddress | ?{$_.InterfaceAlias -eq $(Get-NetAdapter).Name -and $_.AddressFamily -eq "IPv4"} | Select IPAddress).IPAddress
 }
 else {
 	# Hit a common url to grab the VM's public URL (non-platform specific)
-    $PublicIp = (Invoke-WebRequest -Uri "https://api.ipify.org" -UseBasicParsing).Content
+    #$PublicIp = (Invoke-WebRequest -Uri "https://api.ipify.org" -UseBasicParsing).Content
+    $PublicIP = $(get-netipaddress | ?{$_.InterfaceAlias -eq $(Get-NetAdapter).Name -and $_.AddressFamily -eq "IPv4"} | Select IPAddress).IPAddress
 }
 
 Write-Output "Public IP: $PublicIp"

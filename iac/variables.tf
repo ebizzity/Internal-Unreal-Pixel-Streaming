@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 variable "base_name" {
-  default = "random"
+  default = "ps"
 }
 
 #This is the region where the global resource group will be deployed, and global resources like Traffic Manager, etc...
@@ -14,6 +14,11 @@ variable "base_resource_group_name" {
   default = "global-unreal-rg"
 }
 
+#Storage account name
+variable "storage_account_name" {
+  default = "pxlstreamstoragedemo2"
+}
+
 #Storage account tier
 variable "storage_account_tier" {
   default = "Standard"
@@ -24,9 +29,9 @@ variable "storage_account_replication_type" {
   default = "LRS"
 }
 
-variable "traffic_manager_profile_port" {
-  default = 80
-}
+#variable "traffic_manager_profile_port" {
+#  default = 8080
+#}
 
 variable "application_insights_retention_in_days" {
   default = 30

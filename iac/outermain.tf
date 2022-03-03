@@ -27,7 +27,7 @@ provider "azurerm" {
 variable "git-pat" {
   type        = string
   description = "a Git personal access token to access the repo"
-  default     = " "
+  default     = ""
 }
 
 ##############################################################
@@ -72,7 +72,7 @@ resource "azurerm_key_vault" "akv" {
   resource_group_name        = azurerm_resource_group.rg_global.name
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "premium"
-  soft_delete_retention_days = var.keyvault_soft_delete_retention_days
+  //soft_delete_retention_days = var.keyvault_soft_delete_retention_days
   purge_protection_enabled   = false
 
   access_policy {
@@ -105,7 +105,7 @@ resource "azurerm_key_vault" "akv" {
 }
 
 #implement the traffic manager
-resource "azurerm_traffic_manager_profile" "traffic_manager_profile" {
+/* resource "azurerm_traffic_manager_profile" "traffic_manager_profile" {
   name                   = format("%s-trafficmgr", local.base_name)
   resource_group_name    = azurerm_resource_group.rg_global.name
   traffic_routing_method = "Performance"
@@ -120,7 +120,7 @@ resource "azurerm_traffic_manager_profile" "traffic_manager_profile" {
     port     = var.traffic_manager_profile_port
     path     = ""
   }
-}
+} */
 
 #implement appinsights
 resource "azurerm_application_insights" "appI" {
@@ -132,7 +132,8 @@ resource "azurerm_application_insights" "appI" {
 }
 
 resource "azurerm_storage_account" "storageaccount" {
-  name                     = format("%sstoracct", lower(local.base_name))
+  //name                     = format("%sstoracct", lower(local.base_name))
+  name                     = var.storage_account_name
   resource_group_name      = azurerm_resource_group.rg_global.name
   location                 = azurerm_resource_group.rg_global.location
   account_tier             = var.storage_account_tier
@@ -144,7 +145,7 @@ module "region_deployment" {
   base_name = local.base_name
   for_each  = var.deployment_regions
 
-  resource_group_name = format("%s-%s", local.base_name, each.key)
+  #resource_group_name = format("%s-%s", local.base_name, each.key)
   region              = each.value.location
 
   vnet_address_space      = each.value.vnet_address_space
@@ -155,7 +156,7 @@ module "region_deployment" {
   git-pat                      = var.git-pat
   subscription_id              = local.subscription_id
   tenant_id                    = local.tenant_id
-  traffic_manager_profile_name = azurerm_traffic_manager_profile.traffic_manager_profile.name
+#  traffic_manager_profile_name = azurerm_traffic_manager_profile.traffic_manager_profile.name
   global_resource_group_name   = azurerm_resource_group.rg_global.name
   instrumentation_key          = azurerm_application_insights.appI.instrumentation_key
   app_id                       = azurerm_application_insights.appI.app_id

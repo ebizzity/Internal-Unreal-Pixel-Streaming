@@ -16,9 +16,9 @@ variable "region" {
   type = string
 }
 
-variable "resource_group_name" {
-  type = string
-}
+#variable "resource_group_name" {
+#  type = string
+#}
 
 variable "global_resource_group_name" {
   type = string
@@ -48,22 +48,22 @@ locals {
   ip_configuration_name = format("%s-mm-config", var.base_name)
   vmss_name             = format("%s%s", substr(var.base_name, 0, 5), "vmss")
 
-  mm_security_rules = {
-    "Open80In"   = { security_rule_priority = 1000, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "80", security_rule_source_address_prefix = "*", security_rule_destination_address_prefix = "*" },
-    "Open3389In" = { security_rule_priority = 1030, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "3389", security_rule_source_address_prefix = "64.223.129.16", security_rule_destination_address_prefix = "*" },
+/*   mm_security_rules = {
+    "Open8080In"   = { security_rule_priority = 1000, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "8080", security_rule_source_address_prefix = "VirtualNetwork", security_rule_destination_address_prefix = "*" },
+    #"Open3389In" = { security_rule_priority = 1030, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "3389", security_rule_source_address_prefix = "64.223.129.16", security_rule_destination_address_prefix = "*" },
     "Open443In"  = { security_rule_priority = 1040, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "443", security_rule_source_address_prefix = "*", security_rule_destination_address_prefix = "*" },
     "Open80Out"  = { security_rule_priority = 1000, security_rule_direction = "Outbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "80", security_rule_source_address_prefix = "*", security_rule_destination_address_prefix = "*" },
     "Open443Out" = { security_rule_priority = 1060, security_rule_direction = "Outbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "443", security_rule_source_address_prefix = "*", security_rule_destination_address_prefix = "*" }
   }
   be_security_rules = {
-    "Open80In"   = { security_rule_priority = 1000, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "80", security_rule_source_address_prefix = "*", security_rule_destination_address_prefix = "*" },
+    "Open8080In"   = { security_rule_priority = 1000, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "8080", security_rule_source_address_prefix = "*", security_rule_destination_address_prefix = "*" },
     "Open8888In" = { security_rule_priority = 1040, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "8888", security_rule_source_address_prefix = "*", security_rule_destination_address_prefix = "*" },
     "Open8889In" = { security_rule_priority = 1050, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "8889", security_rule_source_address_prefix = "*", security_rule_destination_address_prefix = "*" }
-    "Open3389In" = { security_rule_priority = 1060, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "3389", security_rule_source_address_prefix = "64.223.129.16", security_rule_destination_address_prefix = "*" },
+    #"Open3389In" = { security_rule_priority = 1060, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "3389", security_rule_source_address_prefix = "64.223.129.16", security_rule_destination_address_prefix = "*" },
     "Open443In"  = { security_rule_priority = 1070, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "443", security_rule_source_address_prefix = "*", security_rule_destination_address_prefix = "*" },
     "Open8890In" = { security_rule_priority = 1080, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "8890", security_rule_source_address_prefix = "*", security_rule_destination_address_prefix = "*" },
     "Open8891In" = { security_rule_priority = 1090, security_rule_direction = "Inbound", security_rule_access = "Allow", security_rule_protocol = "Tcp", security_rule_source_port_range = "*", security_rule_destination_port_range = "8891", security_rule_source_address_prefix = "*", security_rule_destination_address_prefix = "*" }
-  }
+  } */
 }
 
 variable "key_vault_id" {
@@ -78,7 +78,7 @@ resource "azurerm_key_vault_secret" "pwd_secret" {
   key_vault_id = var.key_vault_id
 }
 
-#create regional resource group
+/* #create regional resource group
 resource "azurerm_resource_group" "region-rg" {
   name     = var.resource_group_name
   location = var.region
@@ -86,7 +86,7 @@ resource "azurerm_resource_group" "region-rg" {
   tags = {
     "client_id" = data.azurerm_client_config.regional-current.client_id
   }
-}
+} */
 
 variable "vnet_address_space" {
   type = string
@@ -101,38 +101,42 @@ resource "azurerm_virtual_network" "vnet" {
   name                = format("%s-vnet-%s", var.base_name, lower(var.region))
   address_space       = [var.vnet_address_space]
   location            = azurerm_resource_group.region-rg.location
-  resource_group_name = azurerm_resource_group.region-rg.name
+  #resource_group_name = azurerm_resource_group.region-rg.name
+  resource_group_name = var.global_resource_group_name
 }
 
 #create a subnet in the vnet
 resource "azurerm_subnet" "subnet" {
   name                 = format("%s-subnet-%s", var.base_name, lower(var.region))
-  resource_group_name  = azurerm_resource_group.region-rg.name
+  #resource_group_name  = azurerm_resource_group.region-rg.name
+  resource_group_name = var.global_resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.subnet_address_prefixes]
 }
 
 #create matchmaker vm
-resource "azurerm_public_ip" "pip" {
+
+/* resource "azurerm_public_ip" "pip" {
   name                = format("%s-%s-%s-pip", var.base_name, "mmvm", var.region)
   location            = azurerm_resource_group.region-rg.location
   resource_group_name = azurerm_resource_group.region-rg.name
   allocation_method   = "Static"
   sku                 = "Standard"
   domain_name_label   = lower(format("%s-%s", "mmvm", var.base_name))
-}
+} */
 
 resource "azurerm_network_interface" "nic" {
   name                    = format("mm-nic-%s", lower(var.region))
   location                = azurerm_resource_group.region-rg.location
-  resource_group_name     = azurerm_resource_group.region-rg.name
+  #resource_group_name     = azurerm_resource_group.region-rg.name
+  resource_group_name = var.global_resource_group_name
   internal_dns_name_label = lower(format("%s-%s-local", "mm", var.base_name))
 
   ip_configuration {
     name                          = local.ip_configuration_name
     subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.pip.id
+ #   public_ip_address_id          = azurerm_public_ip.pip.id
   }
 }
 
@@ -183,14 +187,15 @@ resource "azurerm_role_assignment" "role_assignment" {
   principal_id         = azurerm_windows_virtual_machine.vm.identity[0].principal_id
 }
 
-#create a NSG for the MM
+/* #create a NSG for the MM
 resource "azurerm_network_security_group" "mm-nsg" {
   name                = format("%s-mm-nsg", var.base_name)
   location            = azurerm_resource_group.region-rg.location
-  resource_group_name = azurerm_resource_group.region-rg.name
-}
+  #resource_group_name = azurerm_resource_group.region-rg.name
+  resource_group_name = var.global_resource_group_name
+} */
 
-#create a NSG Association for the MM and NSG
+/* #create a NSG Association for the MM and NSG
 resource "azurerm_network_interface_security_group_association" "mm_nsg_association" {
   network_interface_id      = azurerm_network_interface.nic.id
   network_security_group_id = azurerm_network_security_group.mm-nsg.id
@@ -209,7 +214,7 @@ resource "azurerm_network_security_rule" "vm_network_security_rules" {
   destination_address_prefix  = each.value.security_rule_destination_address_prefix
   resource_group_name         = azurerm_resource_group.region-rg.name
   network_security_group_name = azurerm_network_security_group.mm-nsg.name
-}
+} */
 
 variable "instrumentation_key" {
   type = string
@@ -251,18 +256,20 @@ resource "azurerm_virtual_machine_extension" "mmextension" {
   PROTECTED_SETTINGS
 }
 
-#create a NSG for the VMSS
+/* #create a NSG for the VMSS
 resource "azurerm_network_security_group" "backend-nsg" {
   name                = format("%s-be-nsg", var.base_name)
   location            = azurerm_resource_group.region-rg.location
-  resource_group_name = azurerm_resource_group.region-rg.name
-}
+  #resource_group_name = azurerm_resource_group.region-rg.name
+  resource_group_name = var.global_resource_group_name
+} */
 
 #create the vmss
 resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
   name                = local.vmss_name
   location            = azurerm_resource_group.region-rg.location
-  resource_group_name = azurerm_resource_group.region-rg.name
+  #resource_group_name = azurerm_resource_group.region-rg.name
+  resource_group_name = var.global_resource_group_name
 
   admin_username = var.backend_admin_username
   admin_password = local.safePWD
@@ -272,6 +279,8 @@ resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
 
   enable_automatic_updates = true
   upgrade_mode             = "Automatic"
+  priority = "Spot"
+  eviction_policy = "Deallocate"
 
   identity {
     type = "SystemAssigned"
@@ -293,17 +302,17 @@ resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
     name    = format("vmss-nic-%s", lower(var.region))
     primary = true
 
-    network_security_group_id = azurerm_network_security_group.backend-nsg.id
+    #network_security_group_id = azurerm_network_security_group.backend-nsg.id
 
     ip_configuration {
-      name      = "external"
+      name      = "internal"
       primary   = true
       subnet_id = azurerm_subnet.subnet.id
 
-      public_ip_address {
-        name              = "vmss_public_ip"
-        domain_name_label = lower(format("%s-%s", "vmss", var.base_name))
-      }
+  #     public_ip_address {
+  #      name              = "vmss_public_ip"
+  #      domain_name_label = lower(format("%s-%s", "vmss", var.base_name))
+#      } 
     }
   }
 
@@ -321,7 +330,7 @@ resource "azurerm_role_assignment" "vmss_role_assignment" {
 }
 
 #open inbound and outbound nsgs for the vmss
-resource "azurerm_network_security_rule" "vmss_network_security_rules" {
+/* resource "azurerm_network_security_rule" "vmss_network_security_rules" {
   for_each                    = local.be_security_rules
   name                        = each.key
   priority                    = each.value.security_rule_priority
@@ -334,7 +343,7 @@ resource "azurerm_network_security_rule" "vmss_network_security_rules" {
   destination_address_prefix  = each.value.security_rule_destination_address_prefix
   resource_group_name         = azurerm_resource_group.region-rg.name
   network_security_group_name = azurerm_network_security_group.backend-nsg.name
-}
+} */
 
 #now I have the vmss_principal_id that I need to give rights to for AKV
 #certificates list permission
@@ -354,8 +363,10 @@ resource "azurerm_key_vault_access_policy" "vmss-identity-ap" {
 locals {
   internal_fqdn          = format("%s.%s", azurerm_network_interface.nic.internal_dns_name_label, azurerm_network_interface.nic.internal_domain_name_suffix)
   backend_extension_name = "BE-CS-Extension"
-  be_command             = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${azurerm_resource_group.region-rg.name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -mm_lb_fqdn ${local.internal_fqdn} -instancesPerNode ${var.instancesPerNode} -streamingPort ${var.streamingPort} -resolutionWidth ${var.resolutionWidth} -resolutionHeight ${var.resolutionHeight} -pixel_stream_application_name ${var.pixel_stream_application_name} -fps ${var.fps} -gitpath ${var.gitpath} -pat ${var.git-pat};"
-  be_short_command       = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${azurerm_resource_group.region-rg.name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -mm_lb_fqdn ${local.internal_fqdn} -instancesPerNode ${var.instancesPerNode} -streamingPort ${var.streamingPort} -resolutionWidth ${var.resolutionWidth} -resolutionHeight ${var.resolutionHeight} -pixel_stream_application_name ${var.pixel_stream_application_name} -fps ${var.fps} -gitpath ${var.gitpath};"
+  #be_command             = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${azurerm_resource_group.region-rg.name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -mm_lb_fqdn ${local.internal_fqdn} -instancesPerNode ${var.instancesPerNode} -streamingPort ${var.streamingPort} -resolutionWidth ${var.resolutionWidth} -resolutionHeight ${var.resolutionHeight} -pixel_stream_application_name ${var.pixel_stream_application_name} -fps ${var.fps} -gitpath ${var.gitpath} -pat ${var.git-pat};"
+  #be_short_command       = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${azurerm_resource_group.region-rg.name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -mm_lb_fqdn ${local.internal_fqdn} -instancesPerNode ${var.instancesPerNode} -streamingPort ${var.streamingPort} -resolutionWidth ${var.resolutionWidth} -resolutionHeight ${var.resolutionHeight} -pixel_stream_application_name ${var.pixel_stream_application_name} -fps ${var.fps} -gitpath ${var.gitpath};"
+  be_command             = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${azurerm_resource_group.region-rg.name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -mm_lb_fqdn ${azurerm_network_interface.nic.private_ip_address} -instancesPerNode ${var.instancesPerNode} -streamingPort ${var.streamingPort} -resolutionWidth ${var.resolutionWidth} -resolutionHeight ${var.resolutionHeight} -pixel_stream_application_name ${var.pixel_stream_application_name} -fps ${var.fps} -gitpath ${var.gitpath} -pat ${var.git-pat};"
+  be_short_command       = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${azurerm_resource_group.region-rg.name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -mm_lb_fqdn ${azurerm_network_interface.nic.private_ip_address} -instancesPerNode ${var.instancesPerNode} -streamingPort ${var.streamingPort} -resolutionWidth ${var.resolutionWidth} -resolutionHeight ${var.resolutionHeight} -pixel_stream_application_name ${var.pixel_stream_application_name} -fps ${var.fps} -gitpath ${var.gitpath};"
   #azurerm_public_ip.pip.fqdn
 
   #if git-pat is "" then don't add that parameter
@@ -385,13 +396,15 @@ variable "traffic_manager_profile_name" {
 }
 
 #associate the MM to the TM
-resource "azurerm_traffic_manager_endpoint" "traffic_manager_endpoint" {
+
+/* resource "azurerm_traffic_manager_endpoint" "traffic_manager_endpoint" {
   name                = format("%s-trafficmgr-%s", var.base_name, var.region)
   resource_group_name = var.global_resource_group_name
   profile_name        = var.traffic_manager_profile_name
 
-  #adding target for the pip fqdn
+#adding target for the pip fqdn
+
   target            = azurerm_public_ip.pip.fqdn
   endpoint_location = azurerm_resource_group.region-rg.location
   type              = "externalEndpoints"
-}
+} */
