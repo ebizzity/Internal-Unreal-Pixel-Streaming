@@ -41,12 +41,15 @@ variable "keyvault_soft_delete_retention_days" {
   default = 7
 }
 
+
 #set the regional values in the terraform.tfvars
 variable "deployment_regions" {
   type = map(object({
     location                = string
     vnet_address_space      = string
     subnet_address_prefixes = string
+    plsubnet_address_prefixes = string
+
   }))
 }
 

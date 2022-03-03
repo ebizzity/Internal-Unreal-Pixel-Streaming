@@ -138,6 +138,10 @@ resource "azurerm_storage_account" "storageaccount" {
   location                 = azurerm_resource_group.rg_global.location
   account_tier             = var.storage_account_tier
   account_replication_type = var.storage_account_replication_type
+
+  network_rules {
+    default_action = "Deny"
+  }
 }
 
 module "region_deployment" {
@@ -150,6 +154,7 @@ module "region_deployment" {
 
   vnet_address_space      = each.value.vnet_address_space
   subnet_address_prefixes = each.value.subnet_address_prefixes
+  plsubnet_address_prefixes = each.value.plsubnet_address_prefixes
 
   key_vault_id = azurerm_key_vault.akv.id
 

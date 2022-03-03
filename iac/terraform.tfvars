@@ -4,9 +4,10 @@
 deployment_regions = {
 
   eastus-unreal-rg = {
-    location                = "eastus"
-    vnet_address_space      = "10.100.0.0/16"
-    subnet_address_prefixes = "10.100.0.0/22"
+    location                  = "eastus"
+    vnet_address_space        = "10.100.0.0/16"
+    subnet_address_prefixes   = "10.100.0.0/22"
+    plsubnet_address_prefixes = "10.100.4.0/28"
   }
 
   #Uncomment the below to add more regional deployments
@@ -15,18 +16,21 @@ deployment_regions = {
     location                = "westus"
     vnet_address_space      = "10.101.0.0/16"
     subnet_address_prefixes = "10.101.0.0/22"
+    plsubnet_address_prefixes = "10.101.3.0/28"
   }
 
   southeastasia-unreal-rg = {
     location                = "southeastasia"
     vnet_address_space      = "10.102.0.0/16"
     subnet_address_prefixes = "10.102.0.0/22"
+    plsubnet_address_prefixes = "10.102.3.0/28"
   },
 
   westeurope-unreal-rg = {
     location                = "westeurope"
     vnet_address_space      = "10.103.0.0/16"
     subnet_address_prefixes = "10.103.0.0/22"
+    plsubnet_address_prefixes = "10.103.3.0/28"
   }  
   */
 }

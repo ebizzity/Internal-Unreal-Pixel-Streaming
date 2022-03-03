@@ -96,22 +96,51 @@ variable "subnet_address_prefixes" {
   type = string
 }
 
+variable "plsubnet_address_prefixes" {
+  type = string
+}
+
 #create the vnet for the region
 resource "azurerm_virtual_network" "vnet" {
   name                = format("%s-vnet-%s", var.base_name, lower(var.region))
   address_space       = [var.vnet_address_space]
-  location            = azurerm_resource_group.region-rg.location
+  location            = var.region
   #resource_group_name = azurerm_resource_group.region-rg.name
   resource_group_name = var.global_resource_group_name
 }
 
-#create a subnet in the vnet
+#create a subnet in the vnet for compute
 resource "azurerm_subnet" "subnet" {
   name                 = format("%s-subnet-%s", var.base_name, lower(var.region))
   #resource_group_name  = azurerm_resource_group.region-rg.name
   resource_group_name = var.global_resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.subnet_address_prefixes]
+}
+
+#create a subnet in the vnet for PL
+resource "azurerm_subnet" "plsubnet" {
+  name                 = format("%s-plsubnet-%s", var.base_name, lower(var.region))
+  #resource_group_name  = azurerm_resource_group.region-rg.name
+  resource_group_name = var.global_resource_group_name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [var.plsubnet_address_prefixes]
+}
+
+#create pl endpoint for storage acct.
+
+resource "azurerm_private_endpoint" "storagepl" {
+  name                = format("%s-pl", var.storage_account_name)
+  location            = var.region
+  resource_group_name = var.global_resource_group_name
+  subnet_id           = azurerm_subnet.plsubnet.id
+
+  private_service_connection {
+    name                           = format("pl-%s", var.storage_account_name)
+    private_connection_resource_id = var.storage_account_id
+    is_manual_connection           = false
+    subresource_names = ["blob"]
+  }
 }
 
 #create matchmaker vm
@@ -127,7 +156,7 @@ resource "azurerm_subnet" "subnet" {
 
 resource "azurerm_network_interface" "nic" {
   name                    = format("mm-nic-%s", lower(var.region))
-  location                = azurerm_resource_group.region-rg.location
+  location                = var.region
   #resource_group_name     = azurerm_resource_group.region-rg.name
   resource_group_name = var.global_resource_group_name
   internal_dns_name_label = lower(format("%s-%s-local", "mm", var.base_name))
@@ -142,8 +171,8 @@ resource "azurerm_network_interface" "nic" {
 
 resource "azurerm_windows_virtual_machine" "vm" {
   name                     = "mm-vm"
-  location                 = azurerm_resource_group.region-rg.location
-  resource_group_name      = azurerm_resource_group.region-rg.name
+  location                 = var.region
+  resource_group_name      = var.global_resource_group_name
   size                     = var.matchmaker_vm_size
   admin_username           = var.matchmaker_admin_username
   admin_password           = local.safePWD
@@ -231,8 +260,8 @@ variable "git-pat" {
 
 locals {
   extension_name   = "MM-CS-Extension"
-  mm-command       = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${azurerm_resource_group.region-rg.name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -gitpath ${var.gitpath} -pat ${var.git-pat};"
-  mm-short_command = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${azurerm_resource_group.region-rg.name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -gitpath ${var.gitpath};"
+  mm-command       = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${var.global_resource_group_name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -gitpath ${var.gitpath} -pat ${var.git-pat};"
+  mm-short_command = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${var.global_resource_group_name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -gitpath ${var.gitpath};"
 
   #if git-pat is "" then don't add that parameter
   mm-paramstring = var.git-pat != "" ? local.mm-command : local.mm-short_command
@@ -267,7 +296,7 @@ resource "azurerm_network_security_group" "backend-nsg" {
 #create the vmss
 resource "azurerm_windows_virtual_machine_scale_set" "vmss" {
   name                = local.vmss_name
-  location            = azurerm_resource_group.region-rg.location
+  location            = var.region
   #resource_group_name = azurerm_resource_group.region-rg.name
   resource_group_name = var.global_resource_group_name
 
@@ -365,8 +394,8 @@ locals {
   backend_extension_name = "BE-CS-Extension"
   #be_command             = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${azurerm_resource_group.region-rg.name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -mm_lb_fqdn ${local.internal_fqdn} -instancesPerNode ${var.instancesPerNode} -streamingPort ${var.streamingPort} -resolutionWidth ${var.resolutionWidth} -resolutionHeight ${var.resolutionHeight} -pixel_stream_application_name ${var.pixel_stream_application_name} -fps ${var.fps} -gitpath ${var.gitpath} -pat ${var.git-pat};"
   #be_short_command       = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${azurerm_resource_group.region-rg.name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -mm_lb_fqdn ${local.internal_fqdn} -instancesPerNode ${var.instancesPerNode} -streamingPort ${var.streamingPort} -resolutionWidth ${var.resolutionWidth} -resolutionHeight ${var.resolutionHeight} -pixel_stream_application_name ${var.pixel_stream_application_name} -fps ${var.fps} -gitpath ${var.gitpath};"
-  be_command             = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${azurerm_resource_group.region-rg.name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -mm_lb_fqdn ${azurerm_network_interface.nic.private_ip_address} -instancesPerNode ${var.instancesPerNode} -streamingPort ${var.streamingPort} -resolutionWidth ${var.resolutionWidth} -resolutionHeight ${var.resolutionHeight} -pixel_stream_application_name ${var.pixel_stream_application_name} -fps ${var.fps} -gitpath ${var.gitpath} -pat ${var.git-pat};"
-  be_short_command       = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${azurerm_resource_group.region-rg.name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -mm_lb_fqdn ${azurerm_network_interface.nic.private_ip_address} -instancesPerNode ${var.instancesPerNode} -streamingPort ${var.streamingPort} -resolutionWidth ${var.resolutionWidth} -resolutionHeight ${var.resolutionHeight} -pixel_stream_application_name ${var.pixel_stream_application_name} -fps ${var.fps} -gitpath ${var.gitpath};"
+  be_command             = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${var.global_resource_group_name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -mm_lb_fqdn ${azurerm_network_interface.nic.private_ip_address} -instancesPerNode ${var.instancesPerNode} -streamingPort ${var.streamingPort} -resolutionWidth ${var.resolutionWidth} -resolutionHeight ${var.resolutionHeight} -pixel_stream_application_name ${var.pixel_stream_application_name} -fps ${var.fps} -gitpath ${var.gitpath} -pat ${var.git-pat};"
+  be_short_command       = "powershell -ExecutionPolicy Unrestricted -NoProfile -NonInteractive -command cp c:/AzureData/CustomData.bin c:/AzureData/install.ps1; c:/AzureData/install.ps1 -subscription_id ${var.subscription_id} -resource_group_name ${var.global_resource_group_name} -vmss_name ${local.vmss_name} -application_insights_key ${var.instrumentation_key} -mm_lb_fqdn ${azurerm_network_interface.nic.private_ip_address} -instancesPerNode ${var.instancesPerNode} -streamingPort ${var.streamingPort} -resolutionWidth ${var.resolutionWidth} -resolutionHeight ${var.resolutionHeight} -pixel_stream_application_name ${var.pixel_stream_application_name} -fps ${var.fps} -gitpath ${var.gitpath};"
   #azurerm_public_ip.pip.fqdn
 
   #if git-pat is "" then don't add that parameter
@@ -391,9 +420,9 @@ resource "azurerm_virtual_machine_scale_set_extension" "ue4extension" {
   PROTECTED_SETTINGS
 }
 
-variable "traffic_manager_profile_name" {
+/* variable "traffic_manager_profile_name" {
   type = string
-}
+} */
 
 #associate the MM to the TM
 
